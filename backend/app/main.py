@@ -1,12 +1,21 @@
 from flask import Flask, request, jsonify
 from summarizer import generate_summary
-from detector import detect_fake_news
+from detector import detect_fake_news, configure_fact_checker
 from explain import explain_prediction
 from utils import preprocess_text
 from flask_cors import CORS
 import requests
+import os
 
 NEWS_API_KEY ='3dc99c57fb8a6d468901891e9f631a96'  # TODO: Replace with your NewsAPI key
+FACT_CHECK_API_KEY = 'AIzaSyB3pqcMU_tFrtOt2X4dC2wSYi4potn0sEs'  # API key directly embedded
+
+# Configure fact checker if API key is available
+if FACT_CHECK_API_KEY:
+    configure_fact_checker(FACT_CHECK_API_KEY)
+else:
+    print("Warning: FACT_CHECK_API_KEY not found in environment variables. Fact checking will be disabled.")
+
 
 app = Flask(__name__)
 CORS(app)

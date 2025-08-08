@@ -3,6 +3,10 @@ from transformers import pipeline
 import joblib
 import os
 import re
+from fact_check import GoogleFactCheck
+
+# Initialize fact checker (will be configured with API key later)
+fact_checker = None
 
 # Load trained models
 def load_models():
@@ -58,6 +62,15 @@ def analyze_metadata_credibility(metadata):
 
 def detect_fake_news(tfidf_vec, sbert_vec, metadata, text):
     try:
+        # First try Google Fact Check API if available
+        if fact_checker is not None:
+            try:
+                fact_label, fact_score, fact_details = fact_checker.check_claim(text)
+                if fact_details is not None:  # If we got a fact check match
+                    return fact_label, fact_score
+            except Exception as e:
+                print(f"Error with fact checking: {e}")
+                # Continue with ML models if fact checking fails
         # Use trained models if available
         if vectorizer is not None and lr_model is not None and xgb_model is not None:
             # Vectorize the text
@@ -248,4 +261,9 @@ def detect_fake_news(tfidf_vec, sbert_vec, metadata, text):
     except Exception as e:
         print(f"Error in detect_fake_news: {e}")
         # Ultimate fallback
-        return 'fake', 0.5 
+        return 'fake', 0.5
+
+def configure_fact_checker(api_key):
+    """Configure the fact checker with the provided API key"""
+    global fact_checker
+    fact_checker = GoogleFactCheck(api_key)
