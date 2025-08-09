@@ -18,7 +18,7 @@ else:
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)# ... existing code ...
 
 @app.route('/summarize_detect', methods=['POST'])
 def summarize_and_detect():
@@ -73,8 +73,8 @@ def summarize_and_detect():
     print(f"DEBUG: Summary generated: {len(summary)} characters")
 
     # Detect fake news
-    label, score = detect_fake_news(tfidf_vec, sbert_vec, metadata, clean_text)
-    print(f"DEBUG: Detection result - Label: {label}, Score: {score}")
+    label, score, verification_method = detect_fake_news(tfidf_vec, sbert_vec, metadata, clean_text)
+    print(f"DEBUG: Detection result - Label: {label}, Score: {score}, Method: {verification_method}")
 
     # Explain
     print(f"DEBUG: Calling explain_prediction...")
@@ -95,12 +95,13 @@ def summarize_and_detect():
         'summary': summary or '',
         'credibility_label': label or '',
         'credibility_score': score if score is not None else 0,
+        'verification_method': verification_method,  # Added verification_method
         'explanation': explanation['explanation'],
         'top_words': explanation['top_words'],
         'top_metadata': explanation['top_metadata'],
         'metadata': metadata
     })
-
+    
 @app.route('/news', methods=['GET'])
 def get_latest_news():
     url = 'https://gnews.io/api/v4/top-headlines'

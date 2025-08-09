@@ -333,6 +333,7 @@
                     <div class="credibility-score">
                         <span class="score-badge" id="credibilityBadge">-</span>
                         <span class="score-value">Score: <span id="credibilityScore">-</span></span>
+                        <span class="verification-method" id="verificationMethod">-</span>
                     </div>
                     
                     <div class="summary-section">
@@ -447,6 +448,7 @@
             const resultsSection = document.getElementById('resultsSection');
             const credibilityBadge = document.getElementById('credibilityBadge');
             const credibilityScore = document.getElementById('credibilityScore');
+            const verificationMethod = document.getElementById('verificationMethod');
             const summaryText = document.getElementById('summaryText');
             const explanationText = document.getElementById('explanationText');
             
@@ -458,6 +460,12 @@
             // Update score
             const score = (data.credibility_score * 100).toFixed(1);
             credibilityScore.textContent = `${score}%`;
+            
+            // Update verification method
+            const methodText = data.verification_method === 'fact_check' ? 
+                'Verified by Fact-Check API' : 
+                'Analyzed by AI Model';
+            verificationMethod.textContent = methodText;
             
             // Update summary
             summaryText.textContent = data.summary || 'No summary available';
@@ -567,3 +575,10 @@
     </script>
 </body>
 </html>
+.verification-method {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #718096;
+    font-style: italic;
+}

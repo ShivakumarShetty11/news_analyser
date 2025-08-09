@@ -65,12 +65,17 @@ def detect_fake_news(tfidf_vec, sbert_vec, metadata, text):
         # First try Google Fact Check API if available
         if fact_checker is not None:
             try:
-                fact_label, fact_score, fact_details = fact_checker.check_claim(text)
+                fact_label, fact_score, fact_details, verification_method = fact_checker.check_claim(text)
                 if fact_details is not None:  # If we got a fact check match
-                    return fact_label, fact_score
+                    print(f"Fact check successful: {fact_label} ({fact_score})")
+                    return fact_label, fact_score, verification_method
+                else:
+                    print("No fact check matches found, falling back to ML models")
             except Exception as e:
                 print(f"Error with fact checking: {e}")
+                print("Falling back to ML models due to fact check error")
                 # Continue with ML models if fact checking fails
+
         # Use trained models if available
         if vectorizer is not None and lr_model is not None and xgb_model is not None:
             # Vectorize the text
@@ -255,13 +260,13 @@ def detect_fake_news(tfidf_vec, sbert_vec, metadata, text):
             votes = [bert_label, lr_label, xgb_label]
             label = max(set(votes), key=votes.count)
             score = round(np.random.uniform(0.7, 0.95), 2)
-        
-        return label, score
-        
+        # At the end of the try block
+        return label, score, 'model'
+
     except Exception as e:
         print(f"Error in detect_fake_news: {e}")
         # Ultimate fallback
-        return 'fake', 0.5
+        return 'fake', 0.5, 'model'
 
 def configure_fact_checker(api_key):
     """Configure the fact checker with the provided API key"""
